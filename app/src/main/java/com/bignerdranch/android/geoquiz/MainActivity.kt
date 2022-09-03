@@ -62,11 +62,20 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onDestroy() called")
     }
 
-    private fun updateQuestion() = binding.questionTextView.setText(questions[currentIndex].textResId)
+    private fun updateQuestion() {
+        binding.questionTextView.setText(questions[currentIndex].textResId)
+        enableAnswering(true)
+    }
 
     private fun check(guess: Boolean) {
         val answer = questions[currentIndex].answer
         val replyId = if (guess == answer) R.string.correct_toast else R.string.incorrect_toast
         Toast.makeText(this, replyId, Toast.LENGTH_SHORT).show()
+        enableAnswering(false)
+    }
+
+    private fun enableAnswering(choice: Boolean) {
+        binding.trueButton.isEnabled = choice
+        binding.falseButton.isEnabled = choice
     }
 }
