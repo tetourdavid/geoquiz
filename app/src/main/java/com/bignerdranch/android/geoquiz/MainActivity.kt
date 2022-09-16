@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.viewModels
 import com.bignerdranch.android.geoquiz.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity"
@@ -12,29 +13,18 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
-    private val questions = listOf(
-        Question(R.string.question_australia, true),
-        Question(R.string.question_oceans, true),
-        Question(R.string.question_mideast, false),
-        Question(R.string.question_africa, false),
-        Question(R.string.question_americas, true),
-        Question(R.string.question_asia, true)
-    )
-
-    private var currentIndex = 0
+    private val quizViewModel: QuizViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate(Bundle?) called")
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        Log.d(TAG, "Got a quizViewModel: $quizViewModel")
         binding.trueButton.setOnClickListener { check(true) }
         binding.falseButton.setOnClickListener { check(false) }
-        binding.nextButton.setOnClickListener {
-            currentIndex = (currentIndex + 1) % questions.size
-            updateQuestion()
-        }
-        updateQuestion()
+        binding.nextButton.setOnClickListener { open(quizViewModel.nextQuestion) }
+        open(quizViewModel.currentQuestion)
     }
 
     override fun onStart() {
@@ -62,13 +52,13 @@ class MainActivity : AppCompatActivity() {
         Log.d(TAG, "onDestroy() called")
     }
 
-    private fun updateQuestion() {
-        binding.questionTextView.setText(questions[currentIndex].textResId)
+    private fun open(question: Question) {
+        binding.questionTextView.setText(question.textResId)
         enableAnswering(true)
     }
 
     private fun check(guess: Boolean) {
-        val answer = questions[currentIndex].answer
+        val answer = quizViewModel.currentQuestion.answer
         val replyId = if (guess == answer) R.string.correct_toast else R.string.incorrect_toast
         Toast.makeText(this, replyId, Toast.LENGTH_SHORT).show()
         enableAnswering(false)
